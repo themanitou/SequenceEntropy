@@ -90,7 +90,18 @@ if __name__ == '__main__':
         pd.DataFrame(h, columns=["entropy"]).to_csv(entropy_file)
 
     print(f'{ h = }')
-    plt.plot(h)
+    plt.subplot(121)
     plt.ylabel("Entropy")
-    plt.xlabel("Sequence length")
+    plt.xlabel("n")
+    plt.title('Collatz, H(#steps from n to 1)')
+    plt.plot(h, 'b')
+
+    h1 = pd.read_csv("entropy_b181391.txt")["entropy"].to_numpy()
+    print(f'{ h1 = }')
+    plt.subplot(122)
+    plt.ylabel("Entropy")
+    plt.xlabel("n")
+    plt.title('Van-Eck, H(n)')
+    plt.plot(h1, 'r')
+
     plt.show()
