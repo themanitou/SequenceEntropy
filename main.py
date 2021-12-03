@@ -7,18 +7,23 @@
 import argparse
 import re
 import pandas as pd
+import numpy as np
+import os.path
+import matplotlib.pyplot as plt
 
 
 class _RegExLib:
     """Set up regular expressions"""
-    _reg_entry = re.compile(r'(?P<index>[0-9]+) (?P<term>[0-9]+)')
+    _reg_two = re.compile(r'(?P<index>[0-9]+) (?P<term>[0-9]+)')
+    _reg_three = re.compile(r'(?P<num>[0-9]+),(?P<next>[0-9]+),(?P<steps>[0-9]+)')
 
     # use __slots__ to help with memory and performance
-    __slots__ = ['entry']
+    __slots__ = ['two', 'three']
 
     def __init__(self, line):
         # check whether line has a positive match with all of the regular expressions
-        self.entry = self._reg_entry.match(line)
+        self.two = self._reg_two.match(line)
+        self.three = self._reg_three.match(line)
 
 
 def parse(seq_file):
@@ -27,16 +32,41 @@ def parse(seq_file):
         line = next(file)
         while line:
             reg_match = _RegExLib(line)
-            if reg_match.entry:
-                index = reg_match.entry.groupdict()['index']
-                term = reg_match.entry.groupdict()['term']
-                record = {'index': index,
-                          'term': term}
-                data.append(record)
             line = next(file, None)
+            if reg_match.two:
+                index = reg_match.two.groupdict()['index']
+                term = reg_match.two.groupdict()['term']
+            elif reg_match.three:
+                index = reg_match.three.groupdict()['num']
+                term = reg_match.three.groupdict()['steps']
+            else:
+                continue
+
+            record = {'index': index,
+                      'term': term}
+            data.append(record)
+
         data = pd.DataFrame(data)
 
     return data
+
+
+def entropy(s):
+    h = np.zeros(s.size)
+    dict = {}
+    tot = 0
+
+    for i in range(s.size):
+        tot = tot + 1
+        k = s[i]
+        v = dict.get(k, 0)
+        dict[k] = v + 1
+        values = np.array(list(dict.values()))
+        p = values / tot
+        lp = np.log(p)
+        h[i] = np.sum(-p*lp)
+
+    return h
 
 
 if __name__ == '__main__':
@@ -47,7 +77,20 @@ if __name__ == '__main__':
     if args.file:
         seq_file = args.file
     else:
-        seq_file = 'b181391.txt'
+        seq_file = 'a070165.txt'
 
-    data = parse(seq_file)
-    print(f'{ seq_file = }')
+    entropy_file = "entropy_" + seq_file
+
+    if os.path.exists(entropy_file):
+        h = pd.read_csv(entropy_file)["entropy"].to_numpy()
+    else:
+        data = parse(seq_file)
+        terms = data['term'].to_numpy(dtype = int)
+        h = entropy(terms)
+        pd.DataFrame(h, columns=["entropy"]).to_csv(entropy_file)
+
+    print(f'{ h = }')
+    plt.plot(h)
+    plt.ylabel("Entropy")
+    plt.xlabel("Sequence length")
+    plt.show()
