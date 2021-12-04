@@ -101,7 +101,7 @@ if __name__ == '__main__':
     plt.subplot(122)
     plt.ylabel("Entropy")
     plt.xlabel("n")
-    plt.title(r'Van-Eck, H({$a_{n}$})')
+    plt.title(r'Van Eck, H({$a_{n}$})')
     plt.plot(h1, 'r')
 
     plt.show()
