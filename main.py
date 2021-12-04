@@ -93,7 +93,7 @@ if __name__ == '__main__':
     plt.subplot(121)
     plt.ylabel("Entropy")
     plt.xlabel("n")
-    plt.title('Collatz, H(#steps from n to 1)')
+    plt.title('Collatz, H({#steps from n to 1})')
     plt.plot(h, 'b')
 
     h1 = pd.read_csv("entropy_b181391.txt")["entropy"].to_numpy()
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     plt.subplot(122)
     plt.ylabel("Entropy")
     plt.xlabel("n")
-    plt.title('Van-Eck, H(n)')
+    plt.title(r'Van-Eck, H({$a_{n}$})')
     plt.plot(h1, 'r')
 
     plt.show()
